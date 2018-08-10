@@ -26,9 +26,13 @@ export default class App extends Component {
         </View>
         <View style={styles.itemsContainer}>
           <FlatList style={{ backgroundColor: '#fff', paddingHorizontal: 8 }}
-            data={this.state.todoList}
+            data={this.state.todoList.filter((item) => item.status !== 'deleted').map((item) => item)}
+            keyExtractor={(item) => item.id}
             renderItem={({ item }) =>
-              <TouchableWithoutFeedback onPress={this.changeStatus.bind(this, item)}>
+              <TouchableWithoutFeedback
+                onPress={this.changeStatus.bind(this, item)}
+                onLongPress={this.deleteTodo.bind(this, item)}
+              >
                 <View style={{ paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea' }}>
                   <Text style={{ textDecorationLine: item.status === 'undone' ? 'none' : 'line-through' }}>{item.content}</Text>
                 </View>
@@ -69,6 +73,24 @@ export default class App extends Component {
         })
       },
       (error) => { Alert.alert(error) })
+  }
+  deleteTodo(todo) {
+    Alert.alert('删除待办事项', `确定要删除【${todo.content}】吗？`,
+      [
+        { text: '取消', onPress: () => { }, style: 'cancel' },
+        {
+          text: '确定', onPress: () => {
+            TodoModel.destroy(todo.id,
+              () => {
+                todo.status = 'deleted'
+                this.setState(todo)
+              },
+              () => { Alert.alert('错误', '删除失败') }
+            )
+          }
+        }
+      ]
+    )
   }
 }
 

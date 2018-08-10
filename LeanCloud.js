@@ -53,6 +53,10 @@ export const TodoModel = {
     }
     todo.save().then(() => { successFn.call(undefined, item) }, (error) => { errorFn.call(error) })
   },
+  destroy(id, successFn, errorFn) {
+    let todo = AV.Object.createWithoutData('Todo', id);
+    todo.destroy().then(() => { successFn.call(undefined) }, (error) => { errorFn.call(undefined, error) });
+  }
 }
 
 export function logIn(email, password, successFn, errorFn) {
