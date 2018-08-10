@@ -1,14 +1,22 @@
 import React, { Component } from 'react';
+import { TodoModel, logIn } from './LeanCloud'
+import { testuser } from './private.json'
 import ToDoHeader from './ToDoHeader'
 import ToDoInput from './ToDoInput'
-import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert } from 'react-native'
 
 export default class App extends Component {
   constructor(props) {
     super(props)
+    logIn(testuser.email, testuser.password, () => { }, (error) => { Alert.alert(error) })
     this.state = {
-      text: '',
+      todoList: [],
+      newTodo: '',
     }
+    TodoModel.fetch(
+      (items) => { this.setState({ todoList: items }) },
+      (err) => { Alert.alert(err) }
+    )
   }
   render() {
     return (
@@ -18,23 +26,41 @@ export default class App extends Component {
         </View>
         <View style={styles.itemsContainer}>
           <FlatList style={{ backgroundColor: '#fff', paddingHorizontal: 8 }}
-            data={[{ key: '代办1' }, { key: '代办2' }, { key: '代办3' }]}
+            data={this.state.todoList}
             renderItem={({ item }) =>
               <View style={{ paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea' }}>
-                <Text>{item.key}</Text>
+                <Text>{item.content}</Text>
               </View>
             }
           />
         </View>
         <KeyboardAvoidingView style={styles.inputContainer} behavior="padding">
           <ToDoInput style={{ borderColor: '#eaeaea', borderTopWidth: 1, paddingVertical: 16, }}
-            onChangeText={(text) => { this.setState({ text }) }}
-            onSubmitEditing={() => { this.setState({ text: '' }) }}
-            value={this.state.text}
+            onChangeText={(newTodo) => { this.setState({ newTodo }) }}
+            onSubmitEditing={this.addItem.bind(this)}
+            value={this.state.newTodo}
           />
         </KeyboardAvoidingView>
       </View>
     )
+  }
+  addItem() {
+    let { newTodo, todoList } = this.state
+    let newItem = {
+      order: todoList.length,
+      content: newTodo,
+      status: 'undone',
+    }
+    TodoModel.create(newItem,
+      (id) => {
+        newItem.id = id
+        todoList.push(newItem)
+        this.setState({
+          newTodo: '',
+          todoList: todoList
+        })
+      },
+      (error) => { Alert.alert(error) })
   }
 }
 
