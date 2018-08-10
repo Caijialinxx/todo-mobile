@@ -3,7 +3,7 @@ import { TodoModel, logIn } from './LeanCloud'
 import { testuser } from './private.json'
 import ToDoHeader from './ToDoHeader'
 import ToDoInput from './ToDoInput'
-import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert } from 'react-native'
+import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback } from 'react-native'
 
 export default class App extends Component {
   constructor(props) {
@@ -28,9 +28,11 @@ export default class App extends Component {
           <FlatList style={{ backgroundColor: '#fff', paddingHorizontal: 8 }}
             data={this.state.todoList}
             renderItem={({ item }) =>
-              <View style={{ paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea' }}>
-                <Text>{item.content}</Text>
-              </View>
+              <TouchableWithoutFeedback onPress={this.changeStatus.bind(this, item)}>
+                <View style={{ paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea' }}>
+                  <Text style={{ textDecorationLine: item.status === 'undone' ? 'none' : 'line-through' }}>{item.content}</Text>
+                </View>
+              </TouchableWithoutFeedback>
             }
           />
         </View>
@@ -42,6 +44,12 @@ export default class App extends Component {
           />
         </KeyboardAvoidingView>
       </View>
+    )
+  }
+  changeStatus(todoTarget) {
+    TodoModel.update('status', todoTarget,
+      (updatedTodo) => { this.setState(updatedTodo) },
+      (error) => { console.error(error) }
     )
   }
   addItem() {

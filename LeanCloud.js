@@ -43,6 +43,16 @@ export const TodoModel = {
       errorFn.call(undefined, '当前未登录！无法使用！')
     }
   },
+  update(type, item, successFn, errorFn) {
+    let todo = AV.Object.createWithoutData('Todo', item.id)
+    if (type === 'status') {
+      item.status = item.status === 'undone' ? 'done' : 'undone'
+      todo.set('status', item.status);
+    } else if (type === 'order') {
+      todo.set('order', item.order);
+    }
+    todo.save().then(() => { successFn.call(undefined, item) }, (error) => { errorFn.call(error) })
+  },
 }
 
 export function logIn(email, password, successFn, errorFn) {
