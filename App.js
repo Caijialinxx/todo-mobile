@@ -3,7 +3,7 @@ import { TodoModel, logIn } from './LeanCloud'
 import { testuser } from './private.json'
 import ToDoHeader from './ToDoHeader'
 import ToDoInput from './ToDoInput'
-import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback, Animated } from 'react-native'
+import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback, Animated, Image } from 'react-native'
 
 export default class App extends Component {
   constructor(props) {
@@ -41,7 +41,8 @@ export default class App extends Component {
                 onPress={this.changeStatus.bind(this, item)}
                 onLongPress={this.deleteTodo.bind(this, item)}
               >
-                <View style={{ paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea' }}>
+                  <Image style={{ width: 14, height: 14, marginRight: 8 }} source={item.status === 'undone' ? require('./imgs/undone.png') : require('./imgs/done.png')} />
                   <Text style={{ textDecorationLine: item.status === 'undone' ? 'none' : 'line-through' }}>{item.content}</Text>
                 </View>
               </TouchableWithoutFeedback>
@@ -52,7 +53,7 @@ export default class App extends Component {
           />
         </View>
         <KeyboardAvoidingView style={styles.inputContainer} behavior="padding">
-          <ToDoInput style={{ borderColor: '#eaeaea', borderTopWidth: 1, paddingVertical: 16, }}
+          <ToDoInput 
             onChangeText={(newTodo) => { this.setState({ newTodo }) }}
             onSubmitEditing={this.addItem.bind(this)}
             value={this.state.newTodo}
@@ -139,6 +140,5 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inputContainer: {
-    paddingHorizontal: 8
   }
 });
