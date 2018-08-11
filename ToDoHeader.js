@@ -50,8 +50,6 @@ export default class ToDoHeader extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    height: 190,
-    justifyContent: 'flex-end',
     borderBottomWidth: 1,
     borderColor: '#eaeaea',
     padding: 8,

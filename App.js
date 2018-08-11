@@ -3,7 +3,7 @@ import { TodoModel, logIn } from './LeanCloud'
 import { testuser } from './private.json'
 import ToDoHeader from './ToDoHeader'
 import ToDoInput from './ToDoInput'
-import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback } from 'react-native'
+import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback, Animated } from 'react-native'
 
 export default class App extends Component {
   constructor(props) {
@@ -13,6 +13,7 @@ export default class App extends Component {
       todoList: [],
       newTodo: '',
     }
+    this.headerHeight = new Animated.Value(190)
     TodoModel.fetch(
       (items) => { this.setState({ todoList: items }) },
       (err) => { Alert.alert(err) }
@@ -21,9 +22,9 @@ export default class App extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <View style={styles.headerContainer}>
+        <Animated.View style={{ height: this.headerHeight, justifyContent: 'flex-end' }}>
           <ToDoHeader />
-        </View>
+        </Animated.View>
         <View style={styles.itemsContainer}>
           <FlatList style={{ backgroundColor: '#fff', paddingHorizontal: 8 }}
             data={this.state.todoList.filter((item) => item.status !== 'deleted').map((item) => item)}
@@ -38,6 +39,8 @@ export default class App extends Component {
                 </View>
               </TouchableWithoutFeedback>
             }
+            keyboardDismissMode='interactive'
+            onScroll={this.scroll.bind(this)}
           />
         </View>
         <KeyboardAvoidingView style={styles.inputContainer} behavior="padding">
@@ -49,6 +52,22 @@ export default class App extends Component {
         </KeyboardAvoidingView>
       </View>
     )
+  }
+  scroll(e) {
+    this.headerFoldOrNot(e.nativeEvent.contentOffset.y)
+  }
+  headerFoldOrNot(scrollY) {
+    if (scrollY > 0) {
+      Animated.spring(this.headerHeight, {
+        toValue: 100,
+        duration: 50,
+      }).start()
+    } else if (scrollY < 0) {
+      Animated.spring(this.headerHeight, {
+        toValue: 190,
+        duration: 50,
+      }).start()
+    }
   }
   changeStatus(todoTarget) {
     TodoModel.update('status', todoTarget,
