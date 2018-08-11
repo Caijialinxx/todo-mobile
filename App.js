@@ -28,7 +28,14 @@ export default class App extends Component {
         <View style={styles.itemsContainer}>
           <FlatList style={{ backgroundColor: '#fff', paddingHorizontal: 8 }}
             data={this.state.todoList.filter((item) => item.status !== 'deleted').map((item) => item)}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => {
+              if (index > 2) {
+                this.lastItemOffsetY = (index - 2) * 48
+              } else {
+                this.lastItemOffsetY = 1
+              }
+              return item.id
+            }}
             renderItem={({ item }) =>
               <TouchableWithoutFeedback
                 onPress={this.changeStatus.bind(this, item)}
@@ -41,6 +48,7 @@ export default class App extends Component {
             }
             keyboardDismissMode='interactive'
             onScroll={this.scroll.bind(this)}
+            ref={(flatList) => this._flatList = flatList}
           />
         </View>
         <KeyboardAvoidingView style={styles.inputContainer} behavior="padding">
@@ -48,6 +56,9 @@ export default class App extends Component {
             onChangeText={(newTodo) => { this.setState({ newTodo }) }}
             onSubmitEditing={this.addItem.bind(this)}
             value={this.state.newTodo}
+            returnKeyType='done'
+            blurOnSubmit={false}
+            onFocus={this.scrollViewUp.bind(this)}
           />
         </KeyboardAvoidingView>
       </View>
@@ -68,6 +79,9 @@ export default class App extends Component {
         duration: 50,
       }).start()
     }
+  }
+  scrollViewUp() {
+    this._flatList.scrollToOffset({ offset: this.lastItemOffsetY, animated: true })
   }
   changeStatus(todoTarget) {
     TodoModel.update('status', todoTarget,
@@ -90,6 +104,7 @@ export default class App extends Component {
           newTodo: '',
           todoList: todoList
         })
+        this._flatList.scrollToEnd()
       },
       (error) => { Alert.alert(error) })
   }
