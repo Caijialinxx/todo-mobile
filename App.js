@@ -3,7 +3,7 @@ import { TodoModel, logIn } from './LeanCloud'
 import { testuser } from './private.json'
 import ToDoHeader from './ToDoHeader'
 import ToDoInput from './ToDoInput'
-import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback, Animated, Image } from 'react-native'
+import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback, Animated, Image, ScrollView } from 'react-native'
 
 export default class App extends Component {
   constructor(props) {
@@ -14,6 +14,7 @@ export default class App extends Component {
       newTodo: '',
     }
     this.headerHeight = new Animated.Value(190)
+    this.horizontalScrollData = { originalValue: 0, action: '' }
     TodoModel.fetch(
       (items) => { this.setState({ todoList: items }) },
       (err) => { Alert.alert(err) }
@@ -26,7 +27,7 @@ export default class App extends Component {
           <ToDoHeader />
         </Animated.View>
         <View style={styles.itemsContainer}>
-          <FlatList style={{ backgroundColor: '#fff', paddingHorizontal: 8 }}
+          <FlatList
             data={this.state.todoList.filter((item) => item.status !== 'deleted').map((item) => item)}
             keyExtractor={(item, index) => {
               if (index > 2) {
@@ -37,15 +38,36 @@ export default class App extends Component {
               return item.id
             }}
             renderItem={({ item }) =>
-              <TouchableWithoutFeedback
-                onPress={this.changeStatus.bind(this, item)}
-                onLongPress={this.deleteTodo.bind(this, item)}
+              <ScrollView contentContainerStyle={{ flex: 1, justifyContent: 'center' }}
+                horizontal={true} showsHorizontalScrollIndicator={false}
+                onScroll={(e) => {
+                  let distance = e.nativeEvent.contentOffset.x - this.horizontalScrollData.originalValue
+                  if (distance < -40) {
+                    this.horizontalScrollData.action = 'changeStatus'
+                  } else if (distance > 40) {
+                    this.horizontalScrollData.action = 'delete'
+                  }
+                }}
+                scrollEventThrottle={16}
+                onMomentumScrollEnd={this.horizontalScroll.bind(this, item)}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea' }}>
-                  <Image style={{ width: 14, height: 14, marginRight: 8 }} source={item.status === 'undone' ? require('./imgs/undone.png') : require('./imgs/done.png')} />
-                  <Text style={{ textDecorationLine: item.status === 'undone' ? 'none' : 'line-through' }}>{item.content}</Text>
+                <View style={{ backgroundColor: '#388E3C', width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 20 }}>
+                  <Image style={{ tintColor: '#fff', width: 20, height: 20 }} source={require('./imgs/hook.png')} />
                 </View>
-              </TouchableWithoutFeedback>
+                <TouchableWithoutFeedback
+                  onPress={this.changeStatus.bind(this, item)}
+                >
+                  <View style={{ width: '100%', paddingHorizontal: 12, }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea', }}>
+                      <Image style={{ width: 14, height: 14, marginRight: 8 }} source={item.status === 'undone' ? require('./imgs/undone.png') : require('./imgs/done.png')} />
+                      <Text style={{ textDecorationLine: item.status === 'undone' ? 'none' : 'line-through' }}>{item.content}</Text>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+                <View style={{ backgroundColor: '#db3a29', width: '100%', flexDirection: 'row', alignItems: 'center', paddingLeft: 20 }}>
+                  <Image style={{ tintColor: '#fff', width: 20, height: 20 }} source={require('./imgs/bin.png')} />
+                </View>
+              </ScrollView>
             }
             keyboardDismissMode='interactive'
             onScroll={this.scroll.bind(this)}
@@ -53,7 +75,7 @@ export default class App extends Component {
           />
         </View>
         <KeyboardAvoidingView style={styles.inputContainer} behavior="padding">
-          <ToDoInput 
+          <ToDoInput
             onChangeText={(newTodo) => { this.setState({ newTodo }) }}
             onSubmitEditing={this.addItem.bind(this)}
             value={this.state.newTodo}
@@ -64,6 +86,14 @@ export default class App extends Component {
         </KeyboardAvoidingView>
       </View>
     )
+  }
+  horizontalScroll(item) {
+    if (this.horizontalScrollData.action === 'changeStatus') {
+      this.changeStatus.call(this, item)
+    } else if (this.horizontalScrollData.action === 'delete') {
+      this.deleteTodo.call(this, item)
+    }
+    this.horizontalScrollData.action = ''
   }
   scroll(e) {
     this.headerFoldOrNot(e.nativeEvent.contentOffset.y)
