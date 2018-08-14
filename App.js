@@ -31,7 +31,7 @@ export default class App extends Component {
             data={this.state.todoList.filter((item) => item.status !== 'deleted').map((item) => item)}
             keyExtractor={(item, index) => {
               if (index > 2) {
-                this.lastItemOffsetY = (index - 2) * 48
+                this.lastItemOffsetY = (index - 2) * 50
               } else {
                 this.lastItemOffsetY = 1
               }
@@ -58,7 +58,7 @@ export default class App extends Component {
                   onPress={this.changeStatus.bind(this, item)}
                 >
                   <View style={{ width: '100%', paddingHorizontal: 12, }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea', }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', height: 50, paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea', }}>
                       <Image style={{ width: 14, height: 14, marginRight: 8 }} source={item.status === 'undone' ? require('./imgs/undone.png') : require('./imgs/done.png')} />
                       <Text style={{ textDecorationLine: item.status === 'undone' ? 'none' : 'line-through' }}>{item.content}</Text>
                     </View>
@@ -116,7 +116,10 @@ export default class App extends Component {
   }
   changeStatus(todoTarget) {
     TodoModel.update('status', todoTarget,
-      (updatedTodo) => { this.setState(updatedTodo) },
+      (updateTodo) => {
+        todoTarget = updateTodo
+        this.setState(this.state)
+      },
       (error) => { console.error(error) }
     )
   }
