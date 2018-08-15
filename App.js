@@ -3,7 +3,7 @@ import { TodoModel, logIn } from './LeanCloud'
 import { testuser } from './private.json'
 import ToDoHeader from './ToDoHeader'
 import ToDoInput from './ToDoInput'
-import { StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback, Animated, Image, ScrollView } from 'react-native'
+import { PanResponder, StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback, Animated, Image, ScrollView } from 'react-native'
 
 export default class App extends Component {
   constructor(props) {
@@ -12,6 +12,8 @@ export default class App extends Component {
     this.state = {
       todoList: [],
       newTodo: '',
+      isLongPressed: false,
+      scrollEnabled: true,
     }
     this.headerHeight = new Animated.Value(190)
     this.horizontalScrollData = { originalValue: 0, action: '' }
@@ -19,6 +21,27 @@ export default class App extends Component {
       (items) => { this.setState({ todoList: items }) },
       (err) => { Alert.alert(err) }
     )
+
+    this.itemsRefs = []       // 存放所有scrollview组件
+    this._panResponder = PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (e) => {
+        // 记录当前触摸的位置
+      },
+      onPanResponderMove: (e, gestureState) => {
+        if (this.state.isLongPressed) {
+          this.setState({ scrollEnabled: false })
+          // 激活样式并且跟着手指移动
+        }
+      },
+      onPanResponderRelease: () => {
+        // 取消样式，归位
+
+        this.setState({ scrollEnabled: true, isLongPressed: false })
+      },
+      onShouldBlockNativeResponder: () => true,
+    })
   }
   render() {
     return (
@@ -27,7 +50,7 @@ export default class App extends Component {
           <ToDoHeader />
         </Animated.View>
         <View style={styles.itemsContainer}>
-          <FlatList
+          <FlatList scrollEnabled={this.state.scrollEnabled}
             data={this.state.todoList.filter((item) => item.status !== 'deleted').map((item) => item)}
             keyExtractor={(item, index) => {
               if (index > 2) {
@@ -50,12 +73,16 @@ export default class App extends Component {
                 }}
                 scrollEventThrottle={16}
                 onMomentumScrollEnd={this.horizontalScroll.bind(this, item)}
+                scrollEnabled={this.state.scrollEnabled}
+                ref={component => this.itemsRefs[item.order] = component}
+                {... this.state.isLongPressed ? this._panResponder.panHandlers : null}
               >
                 <View style={{ backgroundColor: '#388E3C', width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 20 }}>
                   <Image style={{ tintColor: '#fff', width: 20, height: 20 }} source={require('./imgs/hook.png')} />
                 </View>
                 <TouchableWithoutFeedback
                   onPress={this.changeStatus.bind(this, item)}
+                  onLongPress={() => { this.setState({ isLongPressed: true, scrollEnabled: false }) }}
                 >
                   <View style={{ width: '100%', paddingHorizontal: 12, }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', height: 50, paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea', }}>
@@ -86,6 +113,15 @@ export default class App extends Component {
         </KeyboardAvoidingView>
       </View>
     )
+  }
+  getIdByPosition(y) {
+    for (let i = 0; i < this.itemsRefs.length; i++) {
+      if (y > i * 50 && y <= 50 * (i + 1)) {
+        return i
+      } else if (i === this.itemsRefs.length - 1) {
+        return -1
+      }
+    }
   }
   horizontalScroll(item) {
     if (this.horizontalScrollData.action === 'changeStatus') {
