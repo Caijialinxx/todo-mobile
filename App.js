@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import { TodoModel, logIn } from './LeanCloud'
 import { testuser } from './private.json'
 import ToDoHeader from './ToDoHeader'
+import ToDoItem from './ToDoItem'
 import ToDoInput from './ToDoInput'
-import { PanResponder, StyleSheet, Text, View, FlatList, KeyboardAvoidingView, Alert, TouchableWithoutFeedback, Animated, Image, ScrollView } from 'react-native'
+import { StyleSheet, View, FlatList, KeyboardAvoidingView, Alert, Animated, } from 'react-native'
 
 export default class App extends Component {
   constructor(props) {
@@ -12,36 +13,13 @@ export default class App extends Component {
     this.state = {
       todoList: [],
       newTodo: '',
-      isLongPressed: false,
       scrollEnabled: true,
     }
     this.headerHeight = new Animated.Value(190)
-    this.horizontalScrollData = { originalValue: 0, action: '' }
     TodoModel.fetch(
       (items) => { this.setState({ todoList: items }) },
       (err) => { Alert.alert(err) }
     )
-
-    this.itemsRefs = []       // 存放所有scrollview组件
-    this._panResponder = PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (e) => {
-        // 记录当前触摸的位置
-      },
-      onPanResponderMove: (e, gestureState) => {
-        if (this.state.isLongPressed) {
-          this.setState({ scrollEnabled: false })
-          // 激活样式并且跟着手指移动
-        }
-      },
-      onPanResponderRelease: () => {
-        // 取消样式，归位
-
-        this.setState({ scrollEnabled: true, isLongPressed: false })
-      },
-      onShouldBlockNativeResponder: () => true,
-    })
   }
   render() {
     return (
@@ -61,40 +39,12 @@ export default class App extends Component {
               return item.id
             }}
             renderItem={({ item }) =>
-              <ScrollView contentContainerStyle={{ flex: 1, justifyContent: 'center' }}
-                horizontal={true} showsHorizontalScrollIndicator={false}
-                onScroll={(e) => {
-                  let distance = e.nativeEvent.contentOffset.x - this.horizontalScrollData.originalValue
-                  if (distance < -40) {
-                    this.horizontalScrollData.action = 'changeStatus'
-                  } else if (distance > 40) {
-                    this.horizontalScrollData.action = 'delete'
-                  }
-                }}
-                scrollEventThrottle={16}
-                onMomentumScrollEnd={this.horizontalScroll.bind(this, item)}
+              <ToDoItem todo={item}
                 scrollEnabled={this.state.scrollEnabled}
-                ref={component => this.itemsRefs[item.order] = component}
-                {... this.state.isLongPressed ? this._panResponder.panHandlers : null}
-              >
-                <View style={{ backgroundColor: '#388E3C', width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 20 }}>
-                  <Image style={{ tintColor: '#fff', width: 20, height: 20 }} source={require('./imgs/hook.png')} />
-                </View>
-                <TouchableWithoutFeedback
-                  onPress={this.changeStatus.bind(this, item)}
-                  onLongPress={() => { this.setState({ isLongPressed: true, scrollEnabled: false }) }}
-                >
-                  <View style={{ width: '100%', paddingHorizontal: 12, }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', height: 50, paddingVertical: 16, borderBottomWidth: 1, borderColor: '#eaeaea', }}>
-                      <Image style={{ width: 14, height: 14, marginRight: 8 }} source={item.status === 'undone' ? require('./imgs/undone.png') : require('./imgs/done.png')} />
-                      <Text style={{ textDecorationLine: item.status === 'undone' ? 'none' : 'line-through' }}>{item.content}</Text>
-                    </View>
-                  </View>
-                </TouchableWithoutFeedback>
-                <View style={{ backgroundColor: '#db3a29', width: '100%', flexDirection: 'row', alignItems: 'center', paddingLeft: 20 }}>
-                  <Image style={{ tintColor: '#fff', width: 20, height: 20 }} source={require('./imgs/bin.png')} />
-                </View>
-              </ScrollView>
+                changeStatus={this.changeStatus.bind(this)}
+                deleteTodo={this.deleteTodo.bind(this)}
+                setScrollEnabled={this.setScrollEnabled.bind(this)}
+              />
             }
             keyboardDismissMode='interactive'
             onScroll={this.scroll.bind(this)}
@@ -122,14 +72,6 @@ export default class App extends Component {
         return -1
       }
     }
-  }
-  horizontalScroll(item) {
-    if (this.horizontalScrollData.action === 'changeStatus') {
-      this.changeStatus.call(this, item)
-    } else if (this.horizontalScrollData.action === 'delete') {
-      this.deleteTodo.call(this, item)
-    }
-    this.horizontalScrollData.action = ''
   }
   scroll(e) {
     this.headerFoldOrNot(e.nativeEvent.contentOffset.y)
@@ -195,6 +137,9 @@ export default class App extends Component {
         }
       ]
     )
+  }
+  setScrollEnabled(boolean) {
+    this.setState({ scrollEnabled: boolean })
   }
 }
 
