@@ -1,5 +1,9 @@
 import React, { Component } from 'react'
 import { ScrollView, View, Text, Image, TouchableWithoutFeedback, PanResponder, StyleSheet } from 'react-native'
+import hookImg from './imgs/hook.png'
+import undoneImg from './imgs/undone.png'
+import doneImg from './imgs/done.png'
+import binImg from './imgs/bin.png'
 
 export default class ToDoItems extends Component {
   constructor(props) {
@@ -48,7 +52,7 @@ export default class ToDoItems extends Component {
       >
         <View style={styles.changeStatusContainer}
         >
-          <Image style={styles.imageInHiddenContainer} source={require('./imgs/hook.png')} />
+          <Image style={styles.imageInHiddenContainer} source={hookImg} />
         </View>
         <TouchableWithoutFeedback
           onPress={() => { this.props.changeStatus.call(this, this.props.todo) }}
@@ -56,14 +60,14 @@ export default class ToDoItems extends Component {
         >
           <View style={styles.itemContainer}>
             <View style={styles.itemView}>
-              <Image style={styles.itemImage} source={this.props.todo.status === 'undone' ? require('./imgs/undone.png') : require('./imgs/done.png')} />
+              <Image style={styles.itemImage} source={this.props.todo.status === 'undone' ? undoneImg : doneImg} />
               <Text style={this.props.todo.status === 'undone' ? styles.itemUndone : styles.itemDone}>{this.props.todo.content}</Text>
             </View>
           </View>
         </TouchableWithoutFeedback>
         <View style={styles.deleteItemContainer}
         >
-          <Image style={styles.imageInHiddenContainer} source={require('./imgs/bin.png')} />
+          <Image style={styles.imageInHiddenContainer} source={binImg} />
         </View>
       </ScrollView>
     )

@@ -29,7 +29,7 @@ class Time extends Component {
         break
     }
     return (
-      <Text style={styles.subtitle}>{this.state.month + 1 + '月' + this.state.date + '日 星期' + day}</Text>
+      <Text {...this.props}>{this.state.month + 1 + '月' + this.state.date + '日 星期' + day}</Text>
     )
   }
   changeDate() {
@@ -42,7 +42,7 @@ export default class ToDoHeader extends Component {
     return (
       <View style={styles.container}>
         <Text style={styles.maintitle}>我的一天</Text>
-        <Time />
+        <Time style={styles.subtitle} />
       </View>
     );
   }
@@ -50,18 +50,15 @@ export default class ToDoHeader extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    borderBottomWidth: 1,
-    borderColor: '#eaeaea',
     padding: 8,
   },
-  header: {
-    fontSize: 16,
-  },
   maintitle: {
+    color: '#fff',
     fontSize: 30,
     fontWeight: 'bold',
   },
   subtitle: {
+    color: '#fff',
     fontSize: 18,
   }
 });

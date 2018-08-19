@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Platform, View, Image, TextInput } from 'react-native';
 
 export default class NewTextInput extends Component {
+  // 解决当记录 newTodo 时无法输入中文的问题
   shouldComponentUpdate(nextProps) {
     return Platform.OS !== 'ios'
       || (this.props.value === nextProps.value && (nextProps.defaultValue == undefined || nextProps.defaultValue == ''))
