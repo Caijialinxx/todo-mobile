@@ -3,7 +3,7 @@ import { TodoModel } from './LeanCloud'
 import ToDoHeader from './ToDoHeader'
 import ToDoItem from './ToDoItem'
 import ToDoInput from './ToDoInput'
-import { Image, StyleSheet, View, Text, FlatList, Keyboard, ScrollView, KeyboardAvoidingView, Alert, Animated, } from 'react-native'
+import { Image, StyleSheet, View, FlatList, Keyboard, KeyboardAvoidingView, Alert, Animated, } from 'react-native'
 import profileImg from './imgs/profile.png'
 
 export default class Home extends Component {
