@@ -18,7 +18,7 @@ export const TodoModel = {
         }
       })
       successFn.call(undefined, items)
-    }, (error) => { errorFn.call(undefined, `错误代码：${error.code}\n错误消息：请求被终止，请检查网络是否正确连接！`) })
+    }, (error) => { errorFn.call(undefined, `错误消息：请求被终止，请检查网络是否正确连接！`) })
   },
   create(item, successFn, errorFn) {
     if (AV.User.current()) {
@@ -123,16 +123,16 @@ export function reset(email, successFn, errorFn) {
   }, (error) => {
     switch (error.code) {
       case -1:
-        errorFn.call(undefined, `错误代码：${error.code}\n请求被终止，请检查网络是否正确连接！`)
+        errorFn.call(undefined, `请求被终止，请检查网络是否正确连接！`)
         return;
       case 204:
-        errorFn.call(undefined, `错误代码：${error.code}\n请提供注册时的电子邮箱！`)
+        errorFn.call(undefined, `请提供注册时的电子邮箱！`)
         return;
       case 205:
-        errorFn.call(undefined, `错误代码：${error.code}\n查询不到该电子邮箱，请检查电子邮箱是否输入正确或重新注册！`)
+        errorFn.call(undefined, `查询不到该电子邮箱，请检查电子邮箱是否输入正确或重新注册！`)
         return;
       default:
-        errorFn.call(undefined, `错误代码：${error.code}\n错误消息：${error.message}`)
+        errorFn.call(undefined, `错误消息：${error.message}`)
         return;
     }
   })
@@ -157,10 +157,10 @@ function verify(email) {
   AV.User.requestEmailVerify(email).then(() => { }, (error) => {
     switch (error.code) {
       case -1:
-        alert(`错误代码：${error.code}\n请求被终止，请检查网络是否正确连接！`)
+        alert(`请求被终止，请检查网络是否正确连接！`)
         return;
       default:
-        alert(`错误代码：${error.code}\n错误消息：${error.message}`)
+        alert(`错误消息：${error.message}`)
         return;
     }
   })

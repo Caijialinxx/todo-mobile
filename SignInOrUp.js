@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, Keyboard, ScrollView, View, Text, TextInput, Button, Animated, Alert } from 'react-native'
+import { Platform, StyleSheet, Keyboard, ScrollView, View, Text, TextInput, Button, Animated, Alert, AlertIOS } from 'react-native'
 import { logIn, signUp, reset } from './LeanCloud'
 import { testuser } from './private.json'
 import logo from './imgs/logo.png'
@@ -183,17 +183,37 @@ export default class SignUpOrIn extends Component {
     })
   }
   resetPassword() {
-    Alert.alert('重置密码', `确定要重置密码吗？这将会向您的邮箱${this.state.email}发送重置密码的邮件。`, [
-      {
-        text: '重置密码邮件已发送', onPress: () => {
-          let email = this.state.email,
-            success = () => { Alert.alert(`已向您的邮箱【${email.trim()}】发送重置密码邮件，请转至邮箱查收！`) },
-            error = (error) => { Alert.alert(error) }
-          reset(email, success, error)
-        }
-      },
-      { text: '取消', style: 'cancel' }
-    ], )
+    if (Platform.OS === 'ios') {
+      AlertIOS.prompt('重置密码',
+        `请输入电子邮箱地址，我们将向其发送重置密码的邮件，您根据此邮件的说明即可重新设置新密码。一旦设置成功，旧密码就会失效，您需要通过新密码重新登录。`,
+        [
+          {
+            text: '发送', onPress: (email) => {
+              console.log(email)
+              let success = () => { Alert.alert(`已向您的邮箱【${email.trim()}】发送重置密码邮件，请转至邮箱查收！`) },
+                error = (error) => { Alert.alert(error) }
+              reset(email, success, error)
+            }
+          },
+          { text: '取消', style: 'cancel' }
+        ], 'plain-text', this.state.email, 'email-address')
+    } else {
+      let email = this.state.email
+      if (email)
+        Alert.alert('重置密码', `我们将会向您的邮箱【${this.state.email}】发送重置密码的邮件，一旦设置成功，旧密码就会失效，您需要通过新密码重新登录。`, [
+          {
+            text: '发送', onPress: () => {
+              let success = () => { Alert.alert(`已向您的邮箱【${email}】发送重置密码邮件，请转至邮箱查收！`) },
+                error = (error) => { Alert.alert(error) }
+              reset(email, success, error)
+            }
+          },
+          { text: '取消', style: 'cancel' }
+        ], )
+      else {
+        Alert.alert('请输入电子邮箱地址', `请在登录页面的电子邮箱输入框中输入电子邮箱地址，然后再点击忘记密码。`)
+      }
+    }
   }
   signUp() {
     let { email, password } = this.state,
