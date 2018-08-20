@@ -1,5 +1,17 @@
 {
   "expo": {
-    "sdkVersion": "27.0.0"
+   "name": "ToDo",
+   "icon": "./imgs/app.png",
+   "description": "A lightweight todo app to help you work efficiently.",
+   "version": "1.0.0",
+   "slug": "ToDo",
+   "sdkVersion": "27.0.0",
+   "ios": {
+     "bundleIdentifier": "com.caijialinxx.ToDo"
+   },
+   "android": {
+     "package": "com.caijialinxx.ToDo"
+   },
+   "githubUrl": "https://github.com/Caijialinxx/todo-mobile"
   }
 }
