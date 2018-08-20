@@ -1,133 +1,9 @@
 import React, { Component } from 'react'
-import { Platform, StyleSheet, Keyboard, ScrollView, View, Text, TextInput, Button, Animated, Alert, AlertIOS } from 'react-native'
+import { Platform, StyleSheet, Keyboard, ScrollView, View, Animated, Alert, AlertIOS } from 'react-native'
+import SignUp from './SignUp'
+import LogIn from './LogIn'
 import { logIn, signUp, reset } from './LeanCloud'
-import { testuser } from './private.json'
 import logo from './imgs/logo.png'
-
-class SignUp extends Component {
-  render() {
-    return (
-      <View style={styles.signUpContainer}>
-        <View style={styles.inputContainer}>
-          <TextInput ref={component => this._emailInput = component}
-            value={this.props.data.email}
-            textContentType='emailAddress'
-            keyboardType='email-address'
-            style={styles.input}
-            placeholder='you@example.com'
-            onChangeText={text => this.props.changeState.call(undefined, { email: text })}
-            onSubmitEditing={() => this._passwordSetInput.focus()}
-          />
-          <TextInput ref={component => this._passwordSetInput = component}
-            value={this.props.data.passwordSet}
-            textContentType='password'
-            secureTextEntry={true}
-            style={styles.input}
-            placeholder='create a password'
-            onChangeText={text => this.props.changeState.call(undefined, { passwordSet: text })}
-            onSubmitEditing={() => this._passwordConfirmInput.focus()}
-          />
-          <TextInput ref={component => this._passwordConfirmInput = component}
-            value={this.props.data.password}
-            textContentType='password'
-            secureTextEntry={true}
-            style={styles.input}
-            placeholder='confirm your password'
-            onChangeText={text => this.props.changeState.call(undefined, { password: text })}
-            onSubmitEditing={this.verifyInfo.bind(this)}
-          />
-        </View>
-        <View style={styles.optionsContainer}>
-          <Text style={styles.optionsText} onPress={() => this.props.changeState.call(undefined, { selectedTab: 'logIn', passwordSet: '' })}>已有账号？去登录</Text>
-        </View>
-        <View style={styles.actionContainer}>
-          <Button color='#fff' title='注册' onPress={this.verifyInfo.bind(this)} />
-        </View>
-      </View>
-    )
-  }
-  verifyInfo() {
-    let { email, passwordSet, password } = this.props.data,
-      index_at = email.indexOf('@'),
-      index_point = email.indexOf('.'),
-      length_strAfterPoint = email.substr(index_point + 1).length
-
-    if (email.indexOf(' ') > -1 || email === '') {
-      Alert.alert('电子邮箱无效', '请检查电子邮箱地址是否为空或含有空格！', [{ onPress: () => { this._emailInput.focus() } }])
-    } else if (index_at < 1 || index_point < index_at + 2 || length_strAfterPoint < 2) {
-      Alert.alert('电子邮箱无效', '请检查电子邮箱地址的格式！', [{ onPress: () => { this._emailInput.focus() } }])
-    } else if (password.indexOf(' ') > -1 || password === '') {
-      Alert.alert('密码无效', '密码不能为空或含有空格，请重新设置！', [{
-        onPress: () => {
-          this.props.changeState.call(undefined, { passwordSet: '', password: '' })
-          this._passwordSetInput.focus()
-        }
-      }])
-    } else if (passwordSet !== password) {
-      Alert.alert('密码不一致', '两次输入的密码不一致，注意大小写及标点符号的使用。请重新输入！', [{
-        onPress: () => {
-          this.props.changeState.call(undefined, { passwordSet: '', password: '' })
-          this._passwordSetInput.focus()
-        }
-      }])
-    }
-    else {
-      this.props.signUp.call(undefined)
-    }
-  }
-}
-
-class LogIn extends Component {
-  render() {
-    return (
-      <View style={styles.logInContainer}>
-        <View>
-          <TextInput ref={component => this._emailInput = component}
-            value={this.props.data.email}
-            textContentType='emailAddress'
-            keyboardType='email-address'
-            style={styles.input}
-            placeholder='you@example.com'
-            onChangeText={text => this.props.changeState.call(undefined, { email: text })}
-            onSubmitEditing={() => this._passwordInput.focus()}
-          />
-          <TextInput ref={component => this._passwordInput = component}
-            value={this.props.data.password}
-            textContentType='password'
-            secureTextEntry={true}
-            style={styles.input}
-            placeholder='password'
-            onChangeText={text => this.props.changeState.call(undefined, { password: text })}
-            onSubmitEditing={this.verifyInfo.bind(this)}
-          />
-        </View>
-        <View style={styles.optionsContainer}>
-          <Text style={styles.optionsText} onPress={() => this.props.changeState.call(undefined, { selectedTab: 'signUp', password: '', passwordSet: '' })}>没有账号？去注册</Text>
-          <Text style={styles.optionsText} onPress={() => this.props.resetPassword.call(undefined)}>忘记密码</Text>
-        </View>
-        <View style={styles.actionContainer}>
-          <Button color='#fff' title='登录' onPress={this.verifyInfo.bind(this)} />
-        </View>
-      </View>
-    )
-  }
-  verifyInfo() {
-    let { email, password } = this.props.data,
-      index_at = email.indexOf('@'),
-      index_point = email.indexOf('.'),
-      length_strAfterPoint = email.substr(index_point + 1).length
-
-    if (email.trim() === '') {
-      Alert.alert('邮箱不能为空', '请输入您注册的邮箱，如果未注册，点击下方的注册链接。', [{ onPress: () => { this._emailInput.focus() } }])
-    } else if (password.trim() === '') {
-      Alert.alert('密码不能为空', '', [{ onPress: () => { this._passwordInput.focus() } }])
-    } else if (index_at < 1 || index_point < index_at + 2 || length_strAfterPoint < 2) {
-      Alert.alert('电子邮箱无效', '请输入正确的电子邮箱地址！', [{ onPress: () => { this._emailInput.focus() } }])
-    } else {
-      this.props.logIn.call(undefined)
-    }
-  }
-}
 
 export default class SignUpOrIn extends Component {
   constructor(props) {
@@ -230,7 +106,7 @@ export default class SignUpOrIn extends Component {
     let { email, password } = this.state,
       success = (user) => { this.props.navigation.navigate('Home', { username: user.username }) },
       error = (error) => { Alert.alert(error) }
-    logIn(testuser.email, testuser.password, success, error)
+    logIn(email, password, success, error)
     this.setState({ password: '' })
   }
 }
